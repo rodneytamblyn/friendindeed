@@ -1,27 +1,49 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import type { Need, User, NeedStatus, NeedCategory, Organization } from '../types';
-import { mockNeeds, mockOrganizations, getCurrentUser, setCurrentUser } from '../data/mockData';
+import type { Need, NeedStatus, NeedCategory, Organization } from '../types';
+import { mockNeeds, mockOrganizations } from '../data/mockData';
+import { useAuth } from '../contexts/AuthContext';
+import { apiClient } from '../services/api';
 
 function Home() {
+  const { user, isAuthenticated, login, logout, loading } = useAuth();
   const [needs, setNeeds] = useState<Need[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [currentUser, setCurrentUserState] = useState<User | null>(null);
   const [filterCategory, setFilterCategory] = useState<NeedCategory | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<NeedStatus | 'all'>('all');
   const [filterOrganization, setFilterOrganization] = useState<string | 'all'>('all');
   const [filterLocation, setFilterLocation] = useState<string | 'all'>('all');
-  const [signupForm, setSignupForm] = useState({ name: '', email: '' });
-  const [signupForNeedId, setSignupForNeedId] = useState<string | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    setNeeds(mockNeeds);
-    setOrganizations(mockOrganizations);
-    setCurrentUserState(getCurrentUser());
-    
+    loadData();
     // Set page title
     document.title = 'Friend Indeed - Help for everyday needs';
   }, []);
+
+  const loadData = async () => {
+    try {
+      // For now, use mock data while API is being set up
+      // TODO: Replace with real API calls once backend is deployed
+      setNeeds(mockNeeds);
+      setOrganizations(mockOrganizations);
+      
+      // Uncomment when API is ready:
+      // const [needsData, orgsData] = await Promise.all([
+      //   apiClient.getNeeds(),
+      //   apiClient.getOrganizations()
+      // ]);
+      // setNeeds(needsData);
+      // setOrganizations(orgsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      // Fallback to mock data on error
+      setNeeds(mockNeeds);
+      setOrganizations(mockOrganizations);
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
   const filteredNeeds = needs.filter(need => {
     const categoryMatch = filterCategory === 'all' || need.category === filterCategory;
@@ -37,50 +59,31 @@ function Home() {
 
   const uniqueLocations = Array.from(new Set(organizations.map(org => org.location)));
 
-  const handleVolunteer = (needId: string) => {
+  const handleVolunteer = async (needId: string) => {
     console.log('handleVolunteer called with needId:', needId);
-    console.log('currentUser:', currentUser);
+    console.log('user:', user);
     
-    if (!currentUser) {
-      console.log('No current user, showing inline signup');
-      setSignupForNeedId(needId);
+    if (!isAuthenticated) {
+      console.log('No authentication, redirecting to login');
+      login('github'); // Use GitHub as default login provider
       return;
     }
     
-    console.log('User exists, claiming need');
-    setNeeds(prev => prev.map(need => 
-      need.id === needId 
-        ? { ...need, status: 'claimed' as NeedStatus, volunteerId: currentUser.id, claimedAt: new Date() }
-        : need
-    ));
-  };
-
-  const handleSignup = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newUser: User = {
-      id: Date.now().toString(),
-      name: signupForm.name,
-      email: signupForm.email,
-      role: 'volunteer'
-    };
-    setCurrentUser(newUser);
-    setCurrentUserState(newUser);
-    setSignupForm({ name: '', email: '' });
-    
-    // If signing up for a specific need, claim it immediately
-    if (signupForNeedId) {
+    try {
+      console.log('User authenticated, claiming need');
+      // TODO: Replace with real API call once backend is deployed
+      // const claimedNeed = await apiClient.claimNeed(needId);
+      
+      // For now, update local state
       setNeeds(prev => prev.map(need => 
-        need.id === signupForNeedId 
-          ? { ...need, status: 'claimed' as NeedStatus, volunteerId: newUser.id, claimedAt: new Date() }
+        need.id === needId 
+          ? { ...need, status: 'claimed' as NeedStatus, volunteerId: user.userId, claimedAt: new Date() }
           : need
       ));
-      setSignupForNeedId(null);
+    } catch (error) {
+      console.error('Error claiming need:', error);
+      alert('Failed to claim need. Please try again.');
     }
-  };
-
-  const handleLogout = () => {
-    setCurrentUser(null);
-    setCurrentUserState(null);
   };
 
   const formatDate = (date: Date) => {
@@ -148,7 +151,9 @@ function Home() {
             </div>
             
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              {currentUser ? (
+              {loading ? (
+                <div style={{ color: 'rgba(255,255,255,0.8)' }}>Loading...</div>
+              ) : isAuthenticated ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                   <div style={{
                     display: 'flex',
@@ -161,10 +166,10 @@ function Home() {
                     border: '1px solid rgba(255,255,255,0.3)'
                   }}>
                     <div style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%' }}></div>
-                    <span style={{ color: 'white', fontWeight: '600' }}>Hello, {currentUser.name}</span>
+                    <span style={{ color: 'white', fontWeight: '600' }}>Hello, {user?.userDetails || 'User'}</span>
                   </div>
                   <button
-                    onClick={handleLogout}
+                    onClick={logout}
                     style={{
                       color: 'rgba(255,255,255,0.8)',
                       padding: '10px 16px',
@@ -188,20 +193,34 @@ function Home() {
                   </button>
                 </div>
               ) : (
-                <div style={{
-                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                  color: 'white',
-                  padding: '15px 25px',
-                  borderRadius: '20px',
-                  boxShadow: '0 8px 25px rgba(79, 70, 229, 0.3)',
-                  fontWeight: '600',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px'
-                }}>
-                  <span>🎯</span>
-                  <span>Scroll down to volunteer</span>
-                </div>
+                <button
+                  onClick={() => login('github')}
+                  style={{
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                    color: 'white',
+                    padding: '15px 25px',
+                    borderRadius: '20px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 8px 25px rgba(79, 70, 229, 0.3)',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 12px 35px rgba(79, 70, 229, 0.4)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(79, 70, 229, 0.3)';
+                  }}
+                >
+                  <span>🚀</span>
+                  <span>Login with GitHub</span>
+                </button>
               )}
             </div>
           </div>
@@ -562,7 +581,7 @@ function Home() {
         }}>
           {filteredNeeds.map((need) => {
             const organization = getOrganizationById(need.organizationId);
-            const isSigningUpForThis = signupForNeedId === need.id;
+            // Authentication now handled by Azure Static Web Apps
             
             return (
             <div key={need.id} style={{
@@ -709,7 +728,7 @@ function Home() {
                 </div>
 
                 {/* Action Section */}
-                {need.status === 'open' && !isSigningUpForThis && (
+                {need.status === 'open' && (
                   <button
                     onClick={() => handleVolunteer(need.id)}
                     style={{
@@ -746,126 +765,7 @@ function Home() {
                   </button>
                 )}
 
-                {/* Inline Signup Form */}
-                {isSigningUpForThis && (
-                  <div style={{
-                    background: 'linear-gradient(135deg, #eef2ff 0%, #f3e8ff 100%)',
-                    borderRadius: '20px',
-                    padding: '25px',
-                    border: '1px solid #c7d2fe'
-                  }}>
-                    <h4 style={{
-                      fontWeight: 'bold',
-                      fontSize: '1.2rem',
-                      color: '#111827',
-                      marginBottom: '20px',
-                      textAlign: 'center'
-                    }}>Join as a Volunteer</h4>
-                    <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                      <div>
-                        <input
-                          type="text"
-                          placeholder="Your name"
-                          value={signupForm.name}
-                          onChange={(e) => setSignupForm(prev => ({ ...prev, name: e.target.value }))}
-                          style={{
-                            width: '100%',
-                            padding: '15px 18px',
-                            borderRadius: '15px',
-                            border: '1px solid #d1d5db',
-                            outline: 'none',
-                            fontSize: '0.95rem',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = '#4f46e5';
-                            e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)';
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = '#d1d5db';
-                            e.target.style.boxShadow = 'none';
-                          }}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <input
-                          type="email"
-                          placeholder="Your email"
-                          value={signupForm.email}
-                          onChange={(e) => setSignupForm(prev => ({ ...prev, email: e.target.value }))}
-                          style={{
-                            width: '100%',
-                            padding: '15px 18px',
-                            borderRadius: '15px',
-                            border: '1px solid #d1d5db',
-                            outline: 'none',
-                            fontSize: '0.95rem',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = '#4f46e5';
-                            e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)';
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = '#d1d5db';
-                            e.target.style.boxShadow = 'none';
-                          }}
-                          required
-                        />
-                      </div>
-                      <div style={{ display: 'flex', gap: '12px' }}>
-                        <button
-                          type="submit"
-                          style={{
-                            flex: 1,
-                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                            color: 'white',
-                            padding: '15px 20px',
-                            borderRadius: '15px',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontWeight: '600',
-                            fontSize: '0.95rem',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.background = 'linear-gradient(135deg, #047857 0%, #065f46 100%)';
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                          }}
-                        >
-                          Help & Claim
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSignupForNeedId(null)}
-                          style={{
-                            flex: 1,
-                            background: '#d1d5db',
-                            color: '#374151',
-                            padding: '15px 20px',
-                            borderRadius: '15px',
-                            border: 'none',
-                            cursor: 'pointer',
-                            fontWeight: '600',
-                            fontSize: '0.95rem',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.background = '#9ca3af';
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.background = '#d1d5db';
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
+                {/* Authentication handled by Azure Static Web Apps */}
                 
                 {need.status === 'claimed' && need.volunteerId && (
                   <div style={{
