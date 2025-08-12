@@ -1,8 +1,19 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { getOrganizationsContainer } from "../shared/database";
 
-const httpTrigger: AzureFunction = async (context: Context, req: HttpRequest): Promise<void> => {
+async function organizationsHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+  const corsHeaders = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type"
+  };
+
   try {
+    if (request.method === "OPTIONS") {
+      return { status: 200, headers: corsHeaders };
+    }
+
     const container = getOrganizationsContainer();
     
     const querySpec = {
@@ -11,23 +22,23 @@ const httpTrigger: AzureFunction = async (context: Context, req: HttpRequest): P
     
     const { resources } = await container.items.query(querySpec).fetchAll();
     
-    context.res = {
+    return {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET",
-        "Access-Control-Allow-Headers": "Content-Type"
-      },
-      body: resources
+      headers: corsHeaders,
+      body: JSON.stringify(resources)
     };
   } catch (error) {
-    context.log.error('Error fetching organizations:', error);
-    context.res = {
+    context.error('Error fetching organizations:', error);
+    return {
       status: 500,
-      body: { error: 'Internal server error' }
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Internal server error' })
     };
   }
-};
+}
 
-export default httpTrigger;
+app.http('organizations', {
+  methods: ['GET', 'OPTIONS'],
+  authLevel: 'anonymous',
+  handler: organizationsHandler
+});

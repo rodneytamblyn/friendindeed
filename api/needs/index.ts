@@ -1,8 +1,8 @@
-import { AzureFunction, Context, HttpRequest } from "@azure/functions";
+import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { getNeedsContainer } from "../shared/database";
 import { getAuthUser, requireAuth, getUserEmail } from "../shared/auth";
 
-const httpTrigger: AzureFunction = async (context: Context, req: HttpRequest): Promise<void> => {
+async function needsHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -10,29 +10,40 @@ const httpTrigger: AzureFunction = async (context: Context, req: HttpRequest): P
   };
 
   try {
-    if (req.method === "GET") {
-      await handleGetNeeds(context, req);
-    } else if (req.method === "POST") {
-      await handleCreateNeed(context, req);
+    if (request.method === "OPTIONS") {
+      return { status: 200, headers: corsHeaders };
+    }
+
+    if (request.method === "GET") {
+      return await handleGetNeeds(request, context, corsHeaders);
+    } else if (request.method === "POST") {
+      return await handleCreateNeed(request, context, corsHeaders);
     }
     
-    // Add CORS headers to response
-    context.res.headers = { ...context.res.headers, ...corsHeaders };
+    return {
+      status: 405,
+      headers: corsHeaders,
+      body: JSON.stringify({ error: 'Method not allowed' })
+    };
   } catch (error) {
-    context.log.error('Error in needs endpoint:', error);
-    context.res = {
+    context.error('Error in needs endpoint:', error);
+    return {
       status: 500,
       headers: corsHeaders,
-      body: { error: 'Internal server error' }
+      body: JSON.stringify({ error: 'Internal server error' })
     };
   }
-};
+}
 
-async function handleGetNeeds(context: Context, req: HttpRequest) {
+async function handleGetNeeds(request: HttpRequest, context: InvocationContext, corsHeaders: any): Promise<HttpResponseInit> {
   const container = getNeedsContainer();
   
   // Build query based on filters
-  const { organization, location, category, status } = req.query;
+  const url = new URL(request.url);
+  const organization = url.searchParams.get('organization');
+  const location = url.searchParams.get('location');
+  const category = url.searchParams.get('category');
+  const status = url.searchParams.get('status');
   
   let whereClause = "WHERE c.type = 'need'";
   const parameters: any[] = [];
@@ -66,20 +77,23 @@ async function handleGetNeeds(context: Context, req: HttpRequest) {
   
   const { resources } = await container.items.query(querySpec).fetchAll();
   
-  context.res = {
+  return {
     status: 200,
-    body: resources
+    headers: corsHeaders,
+    body: JSON.stringify(resources)
   };
 }
 
-async function handleCreateNeed(context: Context, req: HttpRequest) {
-  const user = requireAuth(req);
+async function handleCreateNeed(request: HttpRequest, context: InvocationContext, corsHeaders: any): Promise<HttpResponseInit> {
+  const user = requireAuth(request);
   const container = getNeedsContainer();
+  
+  const body = await request.json();
   
   const needData = {
     id: generateId(),
     type: 'need',
-    ...req.body,
+    ...(body as object),
     requesterId: user.userId,
     requesterEmail: getUserEmail(user),
     status: 'open',
@@ -88,9 +102,10 @@ async function handleCreateNeed(context: Context, req: HttpRequest) {
   
   const { resource } = await container.items.create(needData);
   
-  context.res = {
+  return {
     status: 201,
-    body: resource
+    headers: corsHeaders,
+    body: JSON.stringify(resource)
   };
 }
 
@@ -98,4 +113,8 @@ function generateId(): string {
   return Date.now().toString() + Math.random().toString(36).substr(2, 9);
 }
 
-export default httpTrigger;
+app.http('needs', {
+  methods: ['GET', 'POST', 'OPTIONS'],
+  authLevel: 'anonymous',
+  handler: needsHandler
+});

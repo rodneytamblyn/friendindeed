@@ -12,7 +12,7 @@ export interface AuthUser {
 }
 
 export function getAuthUser(req: HttpRequest): AuthUser | null {
-  const authHeader = req.headers['x-ms-client-principal'];
+  const authHeader = req.headers.get('x-ms-client-principal');
   
   if (!authHeader) {
     return null;
