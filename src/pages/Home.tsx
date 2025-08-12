@@ -42,10 +42,8 @@ function Home() {
     console.log('currentUser:', currentUser);
     
     if (!currentUser) {
-      console.log('No current user, showing inline signup for needId:', needId);
-      console.log('Setting signupForNeedId to:', needId);
+      console.log('No current user, showing inline signup');
       setSignupForNeedId(needId);
-      console.log('signupForNeedId state should now be:', needId);
       return;
     }
     
@@ -565,11 +563,6 @@ function Home() {
           {filteredNeeds.map((need) => {
             const organization = getOrganizationById(need.organizationId);
             const isSigningUpForThis = signupForNeedId === need.id;
-            
-            // Debug logging
-            if (signupForNeedId) {
-              console.log(`Need ${need.id}: signupForNeedId=${signupForNeedId}, isSigningUpForThis=${isSigningUpForThis}`);
-            }
             
             return (
             <div key={need.id} style={{

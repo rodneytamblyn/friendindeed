@@ -107,14 +107,6 @@ function OrganizationPage() {
     }
   };
 
-  const getCategoryColor = (category: NeedCategory) => {
-    switch (category) {
-      case 'transport': return 'bg-blue-100 text-blue-800';
-      case 'meals': return 'bg-green-100 text-green-800';
-      case 'companionship': return 'bg-purple-100 text-purple-800';
-      case 'other': return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   return (
     <div style={{ minHeight: '100vh' }}>
@@ -156,6 +148,64 @@ function OrganizationPage() {
               </div>
             </div>
             
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              {currentUser ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    background: 'rgba(255,255,255,0.2)',
+                    padding: '12px 20px',
+                    borderRadius: '25px',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.3)'
+                  }}>
+                    <div style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%' }}></div>
+                    <span style={{ color: 'white', fontWeight: '600' }}>Hello, {currentUser.name}</span>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      color: 'rgba(255,255,255,0.8)',
+                      padding: '10px 16px',
+                      borderRadius: '12px',
+                      background: 'rgba(255,255,255,0.1)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontWeight: '500',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+                      e.currentTarget.style.color = 'white';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                      e.currentTarget.style.color = 'rgba(255,255,255,0.8)';
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div style={{
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                  color: 'white',
+                  padding: '15px 25px',
+                  borderRadius: '20px',
+                  boxShadow: '0 8px 25px rgba(79, 70, 229, 0.3)',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  <span>🎯</span>
+                  <span>Volunteer opportunities below</span>
+                </div>
+              )}
+            </div>
+            
             <div className="flex items-center space-x-4">
               {currentUser ? (
                 <>
@@ -181,181 +231,650 @@ function OrganizationPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Organization Info */}
-        <div className="bg-white rounded-lg shadow-md p-8 mb-8">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{organization.name}</h1>
-              <p className="text-lg text-gray-600 mb-4">{organization.location}, {organization.region}</p>
+      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
+        {/* Organization Hero Section */}
+        <div style={{
+          background: 'white',
+          borderRadius: '30px',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.1)',
+          padding: '50px',
+          marginBottom: '60px',
+          marginTop: '40px',
+          border: '1px solid #f3f4f6'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '40px' }}>
+            <div style={{ flex: 1 }}>
+              <h1 style={{
+                fontSize: '3rem',
+                fontWeight: 'bold',
+                background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                marginBottom: '20px',
+                lineHeight: '1.1'
+              }}>{organization.name}</h1>
+              <p style={{
+                fontSize: '1.3rem',
+                color: '#6b7280',
+                marginBottom: '25px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                <span>📍</span>
+                <span>{organization.location}, {organization.region}</span>
+              </p>
               {organization.description && (
-                <p className="text-gray-700 mb-4">{organization.description}</p>
+                <p style={{
+                  fontSize: '1.1rem',
+                  color: '#374151',
+                  marginBottom: '30px',
+                  lineHeight: '1.6'
+                }}>{organization.description}</p>
               )}
-              <div className="flex items-center space-x-6 text-sm text-gray-500">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '30px', flexWrap: 'wrap' }}>
                 {organization.website && (
                   <a 
                     href={organization.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-indigo-600 hover:text-indigo-800"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      color: '#4f46e5',
+                      textDecoration: 'none',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      padding: '12px 20px',
+                      background: '#eef2ff',
+                      borderRadius: '15px',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.background = '#ddd6fe';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.background = '#eef2ff';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
                   >
-                    🌐 Visit Website
+                    <span>🌐</span>
+                    <span>Visit Website</span>
                   </a>
                 )}
-                <span>📧 {organization.contactEmail}</span>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#6b7280',
+                  fontSize: '1rem',
+                  padding: '12px 20px',
+                  background: '#f9fafb',
+                  borderRadius: '15px'
+                }}>
+                  <span>📧</span>
+                  <span>{organization.contactEmail}</span>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="bg-indigo-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-indigo-600">
+            <div style={{ minWidth: '200px' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #eef2ff 0%, #f3e8ff 100%)',
+                borderRadius: '25px',
+                padding: '30px',
+                textAlign: 'center',
+                border: '1px solid #c7d2fe'
+              }}>
+                <div style={{
+                  fontSize: '3rem',
+                  fontWeight: 'bold',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  marginBottom: '10px'
+                }}>
                   {needs.filter(n => n.status === 'open').length}
                 </div>
-                <div className="text-sm text-gray-600">Open Needs</div>
+                <div style={{ fontSize: '1.1rem', color: '#6b7280', fontWeight: '600' }}>Open Needs</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="mb-6 flex flex-wrap gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value as NeedCategory | 'all')}
-              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="all">All Categories</option>
-              <option value="transport">Transport</option>
-              <option value="meals">Meals & Shopping</option>
-              <option value="companionship">Companionship</option>
-              <option value="other">Other</option>
-            </select>
+        <div style={{ marginBottom: '60px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{
+              fontSize: '2.5rem',
+              fontWeight: 'bold',
+              color: '#111827',
+              marginBottom: '15px'
+            }}>Find the Right Opportunity</h2>
+            <p style={{ fontSize: '1.1rem', color: '#6b7280' }}>Filter by your preferences and availability</p>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as NeedStatus | 'all')}
-              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="all">All</option>
-              <option value="open">Available to Help</option>
-              <option value="claimed">Already Claimed</option>
-              <option value="completed">Completed</option>
-            </select>
+          <div style={{
+            background: 'white',
+            borderRadius: '30px',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.1)',
+            padding: '40px',
+            border: '1px solid #f3f4f6'
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px' }}>
+              <div>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  color: '#374151',
+                  marginBottom: '12px'
+                }}>
+                  <span>🎯</span>
+                  <span>Category</span>
+                </label>
+                <select
+                  value={filterCategory}
+                  onChange={(e) => setFilterCategory(e.target.value as NeedCategory | 'all')}
+                  style={{
+                    width: '100%',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '15px',
+                    padding: '15px 18px',
+                    background: '#f9fafb',
+                    fontSize: '0.95rem',
+                    transition: 'all 0.2s ease',
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#4f46e5';
+                    e.target.style.background = 'white';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.background = '#f9fafb';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                >
+                  <option value="all">All Categories</option>
+                  <option value="transport">🚗 Transport</option>
+                  <option value="meals">🍽️ Meals & Shopping</option>
+                  <option value="companionship">💬 Companionship</option>
+                  <option value="other">🤝 Other</option>
+                </select>
+              </div>
+              
+              <div>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold',
+                  color: '#374151',
+                  marginBottom: '12px'
+                }}>
+                  <span>⚡</span>
+                  <span>Availability</span>
+                </label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as NeedStatus | 'all')}
+                  style={{
+                    width: '100%',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '15px',
+                    padding: '15px 18px',
+                    background: '#f9fafb',
+                    fontSize: '0.95rem',
+                    transition: 'all 0.2s ease',
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#4f46e5';
+                    e.target.style.background = 'white';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.background = '#f9fafb';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                >
+                  <option value="all">All Requests</option>
+                  <option value="open">✅ Available to Help</option>
+                  <option value="claimed">🟡 In Progress</option>
+                  <option value="completed">✅ Completed</option>
+                </select>
+              </div>
+            </div>
+            
+            {/* Filter Summary */}
+            <div style={{
+              marginTop: '30px',
+              paddingTop: '30px',
+              borderTop: '1px solid #e5e7eb',
+              textAlign: 'center'
+            }}>
+              <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
+                Showing <span style={{ fontWeight: 'bold', color: '#4f46e5' }}>{filteredNeeds.length}</span> opportunities
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Needs Grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div style={{
+          display: 'grid',
+          gap: '30px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))'
+        }}>
           {filteredNeeds.map((need) => (
-            <div key={need.id} className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center">
-                  <span className="text-2xl mr-2">{getCategoryIcon(need.category)}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(need.category)}`}>
-                    {need.category}
+            <div key={need.id} style={{
+              background: 'white',
+              borderRadius: '30px',
+              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
+              overflow: 'hidden',
+              border: '1px solid #f3f4f6',
+              transition: 'all 0.3s ease',
+              transform: 'translateY(0)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-10px)';
+              e.currentTarget.style.boxShadow = '0 25px 50px rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.borderColor = '#c7d2fe';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.borderColor = '#f3f4f6';
+            }}>
+              {/* Status Badge and Category Header */}
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '20px',
+                  right: '20px',
+                  zIndex: 10
+                }}>
+                  <span style={{
+                    padding: '8px 16px',
+                    borderRadius: '25px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+                    color: 'white',
+                    ...(need.status === 'open' ? { background: '#10b981' } :
+                       need.status === 'claimed' ? { background: '#f59e0b' } :
+                       need.status === 'completed' ? { background: '#3b82f6' } :
+                       { background: '#6b7280' })
+                  }}>
+                    {need.status === 'open' ? 'Available' : 
+                     need.status === 'claimed' ? 'In Progress' : 
+                     need.status === 'completed' ? 'Completed' : 'Unavailable'}
                   </span>
                 </div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  need.status === 'open' ? 'bg-green-100 text-green-800' :
-                  need.status === 'claimed' ? 'bg-yellow-100 text-yellow-800' :
-                  need.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {need.status}
-                </span>
+                
+                {/* Category Icon Background */}
+                <div style={{
+                  height: '120px',
+                  background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <span style={{ fontSize: '3.5rem', opacity: 0.9 }}>{getCategoryIcon(need.category)}</span>
+                </div>
               </div>
               
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{need.title}</h3>
-              <p className="text-gray-600 mb-4 text-sm">{need.description}</p>
+              <div style={{ padding: '30px' }}>
+                <h3 style={{
+                  fontSize: '1.3rem',
+                  fontWeight: 'bold',
+                  color: '#111827',
+                  marginBottom: '15px',
+                  lineHeight: '1.3'
+                }}>{need.title}</h3>
+                <p style={{
+                  color: '#6b7280',
+                  marginBottom: '25px',
+                  lineHeight: '1.6',
+                  fontSize: '0.95rem'
+                }}>{need.description}</p>
               
-              <div className="space-y-2 text-sm text-gray-500 mb-4">
-                <div className="flex items-center">
-                  <span className="font-medium">📍 Location:</span>
-                  <span className="ml-2">{need.location}</span>
-                </div>
-                {need.timeSlots.map((slot, idx) => (
-                  <div key={idx} className="flex items-center">
-                    <span className="font-medium">🕐 Time:</span>
-                    <span className="ml-2">
-                      {formatDate(slot.start)} - {formatDate(slot.end)}
-                    </span>
+                {/* Details */}
+                <div style={{ marginBottom: '30px' }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '15px',
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{
+                      width: '30px',
+                      height: '30px',
+                      background: '#eef2ff',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      marginTop: '2px'
+                    }}>
+                      <span style={{ fontSize: '1rem' }}>📍</span>
+                    </div>
+                    <span style={{ color: '#374151', fontSize: '1rem', fontWeight: '500' }}>{need.location}</span>
                   </div>
-                ))}
-              </div>
-
-              {need.status === 'open' && (
-                <button
-                  onClick={() => handleVolunteer(need.id)}
-                  className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
-                >
-                  🙋‍♀️ I can help!
-                </button>
-              )}
-              
-              {need.status === 'claimed' && need.volunteerId && (
-                <div className="text-sm text-gray-500">
-                  Claimed {need.claimedAt && `on ${formatDate(need.claimedAt)}`}
+                  {need.timeSlots.map((slot, idx) => (
+                    <div key={idx} style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '15px',
+                      marginBottom: '15px'
+                    }}>
+                      <div style={{
+                        width: '30px',
+                        height: '30px',
+                        background: '#eef2ff',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        marginTop: '2px'
+                      }}>
+                        <span style={{ fontSize: '1rem' }}>🕐</span>
+                      </div>
+                      <span style={{ color: '#374151', fontSize: '1rem' }}>
+                        {formatDate(slot.start)} - {formatDate(slot.end)}
+                      </span>
+                    </div>
+                  ))}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px'
+                  }}>
+                    <div style={{
+                      width: '30px',
+                      height: '30px',
+                      background: '#eef2ff',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <span style={{ fontSize: '1rem' }}>{getCategoryIcon(need.category)}</span>
+                    </div>
+                    <span style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', textTransform: 'capitalize' }}>{need.category}</span>
+                  </div>
                 </div>
-              )}
+
+                {/* Action Section */}
+                {need.status === 'open' && (
+                  <button
+                    onClick={() => handleVolunteer(need.id)}
+                    style={{
+                      width: '100%',
+                      background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                      color: 'white',
+                      padding: '18px 25px',
+                      borderRadius: '20px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      boxShadow: '0 8px 25px rgba(79, 70, 229, 0.3)',
+                      fontWeight: '600',
+                      fontSize: '1.1rem',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px'
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #3730a3 0%, #6b21a8 100%)';
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 12px 35px rgba(79, 70, 229, 0.4)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(79, 70, 229, 0.3)';
+                    }}
+                  >
+                    <span>🙋‍♀️</span>
+                    <span>I can help!</span>
+                    <span>→</span>
+                  </button>
+                )}
+                
+                {need.status === 'claimed' && need.volunteerId && (
+                  <div style={{
+                    background: '#fef3c7',
+                    border: '1px solid #fde68a',
+                    borderRadius: '20px',
+                    padding: '20px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ color: '#92400e', fontWeight: '600', marginBottom: '5px' }}>Claimed by volunteer</div>
+                    <div style={{ fontSize: '0.9rem', color: '#d97706' }}>
+                      {need.claimedAt && `on ${formatDate(need.claimedAt)}`}
+                    </div>
+                  </div>
+                )}
+                
+                {need.status === 'completed' && (
+                  <div style={{
+                    background: '#dbeafe',
+                    border: '1px solid #93c5fd',
+                    borderRadius: '20px',
+                    padding: '20px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ color: '#1d4ed8', fontWeight: '600' }}>✅ Completed</div>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
 
         {filteredNeeds.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No needs found for this organization.</p>
-            <Link to="/" className="text-indigo-600 hover:text-indigo-800 mt-4 inline-block">
-              ← Browse all needs
-            </Link>
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '30px',
+              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
+              padding: '60px',
+              maxWidth: '500px',
+              margin: '0 auto',
+              border: '1px solid #f3f4f6'
+            }}>
+              <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🔍</div>
+              <p style={{ fontSize: '1.3rem', color: '#9ca3af', marginBottom: '30px' }}>No needs found for this organization.</p>
+              <Link to="/" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                color: 'white',
+                padding: '15px 25px',
+                borderRadius: '15px',
+                textDecoration: 'none',
+                fontWeight: '600',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(79, 70, 229, 0.3)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}>
+                <span>←</span>
+                <span>Browse all needs</span>
+              </Link>
+            </div>
           </div>
         )}
       </main>
 
       {/* Signup Modal */}
       {isSigningUp && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">Sign up to volunteer</h3>
-            <form onSubmit={handleSignup}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 50,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '30px',
+            padding: '40px',
+            width: '100%',
+            maxWidth: '500px',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.3)'
+          }}>
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              marginBottom: '25px',
+              textAlign: 'center',
+              color: '#111827'
+            }}>Sign up to volunteer</h3>
+            <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '8px'
+                }}>
                   Name
                 </label>
                 <input
                   type="text"
                   value={signupForm.name}
                   onChange={(e) => setSignupForm(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  style={{
+                    width: '100%',
+                    padding: '15px 18px',
+                    borderRadius: '15px',
+                    border: '2px solid #e5e7eb',
+                    outline: 'none',
+                    fontSize: '1rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#4f46e5';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.boxShadow = 'none';
+                  }}
                   required
                 />
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '8px'
+                }}>
                   Email
                 </label>
                 <input
                   type="email"
                   value={signupForm.email}
                   onChange={(e) => setSignupForm(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  style={{
+                    width: '100%',
+                    padding: '15px 18px',
+                    borderRadius: '15px',
+                    border: '2px solid #e5e7eb',
+                    outline: 'none',
+                    fontSize: '1rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#4f46e5';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(79, 70, 229, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.boxShadow = 'none';
+                  }}
                   required
                 />
               </div>
-              <div className="flex space-x-3">
+              <div style={{ display: 'flex', gap: '15px' }}>
                 <button
                   type="submit"
-                  className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700"
+                  style={{
+                    flex: 1,
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: 'white',
+                    padding: '18px 25px',
+                    borderRadius: '15px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '1rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #047857 0%, #065f46 100%)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
                 >
                   Sign Up & Help
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsSigningUp(false)}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
+                  style={{
+                    flex: 1,
+                    background: '#d1d5db',
+                    color: '#374151',
+                    padding: '18px 25px',
+                    borderRadius: '15px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '1rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = '#9ca3af';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = '#d1d5db';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
                 >
                   Cancel
                 </button>
