@@ -1,6 +1,27 @@
-# React + TypeScript + Vite
+# Friend Indeed - Community Support Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A beautiful, modern React application for connecting volunteers with community members who need help with everyday tasks.
+
+## 🌟 Features
+
+- **Modern Design**: Beautiful gradient UI with smooth animations
+- **Multi-tenant**: Support for multiple organizations
+- **Volunteer Matching**: Simple one-click volunteer signup and need claiming
+- **Real-time Filtering**: Filter by organization, location, category, and status
+- **Responsive**: Mobile-first design that works on all devices
+- **Azure Deployment**: Automated CI/CD with GitHub Actions
+
+## 🚀 Live Demo
+
+Visit the live application: **https://red-plant-0ddf8d500.1.azurestaticapps.net**
+
+## 🛠️ Technology Stack
+
+- **Frontend**: React + TypeScript + Vite
+- **Styling**: TailwindCSS with custom gradients and animations
+- **Routing**: React Router for client-side navigation
+- **Deployment**: Azure Static Web Apps with GitHub Actions CI/CD
+- **Backend Ready**: Azure Functions and Cosmos DB infrastructure prepared
 
 Currently, two official plugins are available:
 
