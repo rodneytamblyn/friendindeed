@@ -13,7 +13,7 @@ function Home() {
   const [filterStatus, setFilterStatus] = useState<NeedStatus | 'all'>('all');
   const [filterOrganization, setFilterOrganization] = useState<string | 'all'>('all');
   const [filterLocation, setFilterLocation] = useState<string | 'all'>('all');
-  const [dataLoading, setDataLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -23,25 +23,21 @@ function Home() {
 
   const loadData = async () => {
     try {
-      // For now, use mock data while API is being set up
-      // TODO: Replace with real API calls once backend is deployed
-      setNeeds(mockNeeds);
-      setOrganizations(mockOrganizations);
-      
-      // Uncomment when API is ready:
-      // const [needsData, orgsData] = await Promise.all([
-      //   apiClient.getNeeds(),
-      //   apiClient.getOrganizations()
-      // ]);
-      // setNeeds(needsData);
-      // setOrganizations(orgsData);
+      // Try to load from API first
+      const [needsData, orgsData] = await Promise.all([
+        apiClient.getNeeds(),
+        apiClient.getOrganizations()
+      ]);
+      setNeeds(needsData);
+      setOrganizations(orgsData);
+      console.log('Successfully loaded data from API');
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading data from API, falling back to mock data:', error);
       // Fallback to mock data on error
       setNeeds(mockNeeds);
       setOrganizations(mockOrganizations);
     } finally {
-      setDataLoading(false);
+      setIsDataLoading(false);
     }
   };
 
@@ -71,15 +67,14 @@ function Home() {
     
     try {
       console.log('User authenticated, claiming need');
-      // TODO: Replace with real API call once backend is deployed
-      // const claimedNeed = await apiClient.claimNeed(needId);
+      // Use real API to claim the need
+      const claimedNeed = await apiClient.claimNeed(needId);
       
-      // For now, update local state
+      // Update local state with the claimed need
       setNeeds(prev => prev.map(need => 
-        need.id === needId 
-          ? { ...need, status: 'claimed' as NeedStatus, volunteerId: user.userId, claimedAt: new Date() }
-          : need
+        need.id === needId ? claimedNeed : need
       ));
+      console.log('Successfully claimed need via API');
     } catch (error) {
       console.error('Error claiming need:', error);
       alert('Failed to claim need. Please try again.');
@@ -229,6 +224,11 @@ function Home() {
 
       {/* Main Content */}
       <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
+        {isDataLoading && (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <p style={{ color: '#9ca3af', fontSize: '1.2rem' }}>Loading...</p>
+          </div>
+        )}
         {/* Hero Section */}
         <div style={{ textAlign: 'center', marginBottom: '80px', marginTop: '60px' }}>
           <div style={{ position: 'relative' }}>

@@ -1,7 +1,9 @@
 import type { Need, Organization, User } from '../types';
 
 export class ApiClient {
-  private baseUrl = '/api';
+  private baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://func-friendindeed-prod.azurewebsites.net/api' 
+    : '/api';
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
